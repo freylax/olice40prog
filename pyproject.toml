@@ -1,0 +1,4 @@
+[tool.ty.environment]
+python-version = "3.13"
+extra-paths = ['/usr/local/lib/python3.13/dist-packages',
+              '/usr/lib/python3/dist-packages', '/usr/lib/python3.13']
