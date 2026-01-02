@@ -79,12 +79,17 @@ try:
     if args.flashsize:
         flashsize = args.flashsize
     else:
-        res = subprocess.run(
-            fr_cmd + ["--flash-size"], check=True, capture_output=True, text=True
-        )
-        flashsize = int(res.stdout.splitlines()[-1])
-        if flashsize == 0:
-            sys.exit("flashsize is zero")
+        try:
+            res = subprocess.run(
+                fr_cmd + ["--flash-size"], check=True, capture_output=True, text=True
+            )
+            flashsize = int(res.stdout.splitlines()[-1])
+            if flashsize == 0:
+                sys.exit("flashsize is zero")
+        except subprocess.CalledProcessError as err:
+            print(err.stdout)
+            print(err.stderr)
+            exit(1)
     # check flash and file sizes
     if filesize > flashsize:
         sys.exit(
@@ -111,18 +116,28 @@ try:
             f"created imagefile {imagefile}\nfilesize={filesize},flashsize={flashsize},used {filesize * 100.0 / flashsize:.2f}% "
         )
     # get the flash name and vendor
-    res = subprocess.run(
-        fr_cmd + ["--flash-name"], check=True, capture_output=True, text=True
-    )
-    _, flash_vendor, _, flash_name = res.stdout.splitlines()[-1].split('"')[:4]
-    print(f"vendor={flash_vendor},name={flash_name}")
-
+    try:
+        res = subprocess.run(
+            fr_cmd + ["--flash-name"], check=True, capture_output=True, text=True
+        )
+        _, flash_vendor, _, flash_name = res.stdout.splitlines()[-1].split('"')[:4]
+        print(f"vendor={flash_vendor},name={flash_name}")
+    except subprocess.CalledProcessError as err:
+        print(err.stdout)
+        print(err.stderr)
+        exit(1)
+    
     if args.binaryfile:
         # flash the file
-        res = subprocess.run(
-            fr_cmd + ["-w", imagefile], check=True, capture_output=True, text=True
-        )
-        print(res.stdout.splitlines()[-1])
+        try:
+            res = subprocess.run(
+                fr_cmd + ["-w", imagefile], check=True, capture_output=True, text=True
+            )
+            print(res.stdout.splitlines()[-1])
+        except subprocess.CalledProcessError as err:
+            print(err.stdout)
+            print(err.stderr)
+            exit(1)
     else:
         print(f"flashsize={flashsize}")
 finally:
